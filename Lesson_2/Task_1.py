@@ -37,8 +37,7 @@ class MultipageProcessor(threading.Thread):
         search_url_part,
         headers,
         params,
-        global_result,
-        bad_link=False
+        global_result
     ):
         super().__init__()
         self.pages_delta = pages_delta
@@ -47,24 +46,19 @@ class MultipageProcessor(threading.Thread):
         self.headers = headers
         self.params = params
         self.global_result = global_result
-        self.bad_link = bad_link
 
     def run(self):
         for i in range(self.pages_delta[0], self.pages_delta[1]):
             self.params["page"] = i
-            if self.bad_link:
-                result = requests.get(
-                    f"https://hh.ru/search/vacancy?clusters=true&area=1&ored_clusters=true&enable_snippets=true&salary=&text=python&page={i}&hhtmFrom=vacancy_search_list",
-                    headers=self.headers).text
-            else:
-                result = requests.get(
-                    f"{self.target_site}{self.search_url_part}",
-                    headers=self.headers,
-                    params=self.params).text
+
+            result = requests.get(
+                f"{self.target_site}{self.search_url_part}",
+                headers=self.headers,
+                params=self.params).text
 
             page = BeautifulSoup(result, "html.parser")
-            with list_lock:
-                self.global_result.append(self.process_page(page, i))
+
+            self.global_result.append(self.process_page(page, i))
 
         print(
             f"Thread: {threading.currentThread().getName()} finished. Page delta: {self.pages_delta[0]}-{self.pages_delta[1]}")
@@ -126,13 +120,6 @@ def main():
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"}
 
-    # params = {
-    # 	"area": "1",
-    # 	"fromSearchLine": "True",
-    # 	"text": search_text,
-    # 	"page": page,
-    # 	"hhtmFrom": "vacancy_search_list"}
-
     params = {
         "clusters": True,
         "area": 1,
@@ -164,7 +151,7 @@ def main():
 
     if one_thread:
         thread_1 = MultipageProcessor(
-            [0, total_pages], target_site, search_url_part, headers, params, global_result, bad_link=False)
+            [0, total_pages], target_site, search_url_part, headers, params, global_result)
         thread_1.start()
         thread_1.join()
     else:
@@ -177,9 +164,9 @@ def main():
                     target_site,
                     search_url_part,
                     headers,
-                    params,
-                    global_result,
-					bad_link=True))
+                    params.copy(),
+                    global_result
+                ))
 
         for thread in threads:
             thread.start()
