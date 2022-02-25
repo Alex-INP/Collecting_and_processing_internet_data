@@ -1,3 +1,4 @@
+import json
 import threading
 from pprint import pprint
 from queue import Queue
@@ -102,12 +103,12 @@ class MultipageProcessor(threading.Thread):
                 final_dict["валюта"] = currency.group(0)
             if numbers:
                 if re.search(r"от", reward):
-                    final_dict["от"] = numbers[0]
+                    final_dict["от"] = int(numbers[0].replace(" ", ""))
                 if re.search(r"до", reward):
-                    final_dict["до"] = numbers[-1]
+                    final_dict["до"] = int(numbers[-1].replace(" ", ""))
                 if re.search(r"–", reward):
-                    final_dict["от"] = numbers[0]
-                    final_dict["до"] = numbers[-1]
+                    final_dict["от"] = int(numbers[0].replace(" ", ""))
+                    final_dict["до"] = int(numbers[-1].replace(" ", ""))
         return final_dict
 
 
@@ -175,6 +176,9 @@ def main():
             thread.join()
 
     global_result = sorted(global_result, key=lambda a: a["страница"])
+
+    with open("scrap_result.txt", "w", encoding="utf-8") as file:
+        json.dump(global_result, file)
 
     print_global_result(global_result)
 
