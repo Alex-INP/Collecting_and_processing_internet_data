@@ -2,6 +2,8 @@ from lxml import html
 import requests
 from pprint import pprint
 
+from pymongo import MongoClient
+
 
 def get_news_data(news_list, headers):
 	result_data = []
@@ -21,6 +23,21 @@ def get_news_data(news_list, headers):
 	return result_data
 
 
+def add_to_db(news_data):
+	mongo_client = MongoClient("localhost", 27017)
+	database = mongo_client["news_database"]
+
+	news_cursor = database.news
+	news_cursor.delete_many({})
+
+	for i in news_data:
+		news_cursor.insert_one(i)
+
+	for i in news_cursor.find({}):
+		print("-"*150)
+		print(i)
+
+
 def main():
 	url = "https://news.mail.ru/?_ga=2.52001898.2107162005.1645944815-1292694162.1644053642"
 	headers = {
@@ -31,6 +48,8 @@ def main():
 
 	scraped_news = get_news_data(links, headers)
 	pprint(scraped_news, sort_dicts=False)
+
+	add_to_db(scraped_news)
 
 
 if __name__ == "__main__":
