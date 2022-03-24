@@ -12,6 +12,8 @@ BOT_NAME = 'bookscraper'
 SPIDER_MODULES = ['bookscraper.spiders']
 NEWSPIDER_MODULE = 'bookscraper.spiders'
 
+IMAGES_STORE = 'images'
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36'
@@ -62,8 +64,13 @@ COOKIES_ENABLED = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+
+# ITEM_PIPELINES = {
+#    'bookscraper.pipelines.BookscraperPipeline': 300,
+# }
 ITEM_PIPELINES = {
-   'bookscraper.pipelines.BookscraperPipeline': 300,
+   'bookscraper.pipelines.LeroyParserPipeline': 300,
+   'bookscraper.pipelines.LeroyPhotosPipeline': 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
